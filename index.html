@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number to Text Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #converter-container {
+      margin-top: 50px;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="converter-container">
+    <label for="numberInput">Enter a number:</label>
+    <input type="number" id="numberInput" oninput="convertNumber()" />
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function NoToText(TheNo, MyCur, MySubCur) {
+      var MyArry1 = ["", "مائة", "مائتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"];
+      var MyArry2 = ["", " عشر", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+      var MyArry3 = ["", "واحد", "اثنان", "ثلاث", "أربع", "خمس", "ست", "سبع", "ثماني", "تسع"];
+
+      var Mybillion = "", MyMillion = "", MyThou = "", MyHun = "", MyFraction = "", MyAnd = " و", ReMark = "";
+
+      if (TheNo > 999999999999.99 || TheNo < 0) {
+        return "Invalid number";
+      }
+
+      if (TheNo === 0) {
+        return "صفر";
+      }
+
+      if (TheNo < 0) {
+        TheNo = Math.abs(TheNo);
+        ReMark = "فقط ";
+      }
+
+      var GetNo = TheNo.toFixed(2).padStart(15, '0');
+
+      for (var i = 0; i < 15; i += 3) {
+        var Myno = (i < 12) ? GetNo.substr(i, 3) : "0" + GetNo.substr(i + 1, 2);
+
+        if (parseInt(Myno) > 0) {
+          var RdNo = Myno.substr(0, 1);
+          var My100 = MyArry1[RdNo];
+          var My1 = MyArry3[Myno.substr(2, 1)];
+          var My10 = MyArry2[Myno.substr(1, 1)];
+
+          if (Myno.substr(1, 2) === "11") My10 = "إحدى عشر";
+          if (Myno.substr(1, 2) === "12") My10 = "إثنى عشر";
+          if (Myno.substr(1, 2) === "10") My10 = "عشرة";
+
+          if (parseInt(Myno.substr(0, 1)) > 0 && parseInt(Myno.substr(1, 2)) > 0) My100 += MyAnd;
+          if (parseInt(Myno.substr(2, 1)) > 0 && parseInt(Myno.substr(1, 1)) > 1) My1 += MyAnd;
+
+          var GetTxt = My100 + My1 + My10;
+
+          if (parseInt(Myno.substr(2, 1)) === 1 && parseInt(Myno.substr(1, 1)) === 1) {
+            GetTxt = My100 + " وإحدى عشر";
+            if (parseInt(Myno.substr(0, 1)) === 0) GetTxt = "إحدى عشر";
+          }
+
+          if (parseInt(Myno.substr(2, 1)) === 2 && parseInt(Myno.substr(1, 1)) === 1) {
+            GetTxt = My100 + " وإثنى عشر";
+            if (parseInt(Myno.substr(0, 1)) === 0) GetTxt = "إثنى عشر";
+          }
+
+          if (i === 0 && GetTxt !== "") {
+            if (parseInt(Myno.substr(0, 3)) > 10) {
+              Mybillion = GetTxt + " مليار";
+            } else {
+              Mybillion = GetTxt + " مليارات";
+              if (parseInt(Myno.substr(0, 3)) === 2) Mybillion = " مليار";
+              if (parseInt(Myno.substr(0, 3)) === 2) Mybillion = " ملياران";
+            }
+          }
+
+          if (i === 3 && GetTxt !== "") {
+            if (parseInt(Myno.substr(0, 3)) > 10) {
+              MyMillion = GetTxt + " مليون";
+            } else {
+              MyMillion = GetTxt + " ملايين";
+              if (parseInt(Myno.substr(0, 3)) === 1) MyMillion = " مليون";
+              if (parseInt(Myno.substr(0, 3)) === 2) MyMillion = " مليونان";
+            }
+          }
+
+          if (i === 6 && GetTxt !== "") {
+            if (parseInt(Myno.substr(0, 3)) > 10) {
+              MyThou = GetTxt + " ألف";
+            } else {
+              MyThou = GetTxt + " آلاف";
+              if (parseInt(Myno.substr(2, 1)) === 1) MyThou = " ألف";
+              if (parseInt(Myno.substr(2, 1)) === 2) MyThou = " ألفان";
+            }
+          }
+
+          if (i === 9 && GetTxt !== "") MyHun = GetTxt;
+          if (i === 12 && GetTxt !== "") MyFraction = GetTxt;
+        }
+      }
+
+      if (Mybillion !== "" && (MyMillion !== "" || MyThou !== "" || MyHun !== "")) {
+        Mybillion += MyAnd;
+      }
+
+      if (MyMillion !== "" && (MyThou !== "" || MyHun !== "")) {
+        MyMillion += MyAnd;
+      }
+
+      if (MyThou !== "" && MyHun !== "") {
+        MyThou += MyAnd;
+      }
+
+      var result = ReMark + Mybillion + MyMillion + MyThou + MyHun + " " + MyCur;
+
+      if (MyFraction !== "") {
+        result += MyAnd + MyFraction + " " + MySubCur;
+      }
+
+      return result.trim();
+    }
+
+    function convertNumber() {
+      var numberInput = document.getElementById('numberInput');
+      var resultDiv = document.getElementById('result');
+      var enteredNumber = parseFloat(numberInput.value);
+
+      if (!isNaN(enteredNumber)) {
+        var result = NoToText(enteredNumber, 'دينار', 'سنت');
+        resultDiv.textContent = result;
+      } else {
+        resultDiv.textContent = 'Please enter a valid number.';
+      }
+    }
+  </script>
+
+</body>
+</html>
